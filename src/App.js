@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
+import store from './store-es6'
+import emitter from './singletons/emitter'
+
+import LoginView from './views/login'
+
 class App extends Component {
+
+  constructor(props) {
+    super(props)
+    let isLoggedIn = store.get('authentication').slack_access_token
+    this.state = {
+      loggedIn: isLoggedIn ? true : false
+    }
+  }
+
+  componentDidMount() {
+    const self = this
+    if(!this.state.isLoggedIn) {
+      emitter.getInstance().once('user-logged-in', (args) => {
+        self.setState({loggedIn: true})
+      })
+    }
+  }
+
   render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-      </div>
-    );
+    if(this.state.loggedIn) {
+      return null;
+    } else {
+      return <LoginView />
+    }
   }
 }
 
